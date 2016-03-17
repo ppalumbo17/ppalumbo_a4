@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/home/peter/Android/Ppalumbo_A4/app/build/intermediates/res/merged/debug/layout-land/activity_welcome.xml",
+        "source": "/home/peter/Android/Ppalumbo_A4/app/src/main/res/layout-land/activity_welcome.xml"
+    },
+    {
+        "merged": "/home/peter/Android/Ppalumbo_A4/app/build/intermediates/res/merged/debug/layout-land/activity_game.xml",
+        "source": "/home/peter/Android/Ppalumbo_A4/app/src/main/res/layout-land/activity_game.xml"
+    }
+]
