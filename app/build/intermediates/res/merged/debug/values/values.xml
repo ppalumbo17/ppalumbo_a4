@@ -215,6 +215,8 @@
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
     <string name="app_name">Ppalumbo_A4</string>
+    <string name="exit">Exit</string>
+    <string name="game_over">GAME OVER!</string>
     <string name="highscore_text">High Score:</string>
     <string name="options_button">Options</string>
     <string name="start_button">Start Game</string>

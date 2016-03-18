@@ -39,8 +39,8 @@ public class ControlledBall {
     }
 
     public void runSimulation() {
-        mBallAccel.x = -1/10000;
-        mBallAccel.y = 1/10000;
+        mBallAccel.x = -1/1000;
+        mBallAccel.y = 1/1000;
         //Time for equations and previous mTime
         long dt = System.currentTimeMillis() - mTime;
         mTime = System.currentTimeMillis();

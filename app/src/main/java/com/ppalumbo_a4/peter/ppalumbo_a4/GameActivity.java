@@ -2,6 +2,7 @@ package com.ppalumbo_a4.peter.ppalumbo_a4;
 
 import android.app.Activity;
 
+import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -12,8 +13,11 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.os.Handler;
+import android.widget.Toast;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,18 +41,33 @@ public class GameActivity extends Activity {
     //Sensor manager handles different phone sensors
     SensorManager mSensorManager;
 
+    //Current time for score
+    long current_time;
 
+    //This keeps score of the game
+    long game_score = 0;
 
+    //What if I make a context
+    Context context;
+
+    //Bool to check if game is over
+    boolean isGameOver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         FrameLayout mainview = (FrameLayout)findViewById(R.id.main_game_view);
-
+        isGameOver = false;
         mGameView = new GameView(this);
         mainview.addView(mGameView);
+
+        context = this;
+
+        //initialize the current time after the game starts
+        current_time = System.currentTimeMillis();
 
         // Get screen dimensions (in pixels).
         Display display = getWindowManager().getDefaultDisplay();
@@ -89,7 +108,9 @@ public class GameActivity extends Activity {
         public void onSensorChanged(SensorEvent event) {
             PointF accel = new PointF(event.values[0], event.values[1]);
             //mControlledBall.setmBallAccel(accel);
-            mGameBall.setDeviceAccel(accel);
+            if(!isGameOver) {
+                mGameBall.setDeviceAccel(accel);
+            }
             //Log.d(TAG, "onSensorChanged() " + event.toString());
         }
 
@@ -117,10 +138,9 @@ public class GameActivity extends Activity {
 
                 mGameView.setUserBallPos(mGameBall.getBallPos());
                 mGameView.setUserBallR(mGameBall.getBallRadius());
-                //EDITED
-//                mSimView.setBallPos(mSimulator_second.getBallPos());
-//                mSimView.setR(mSimulator_second.getBallRadius());
 
+                //check if game ball has gone outside of automated ball
+                checkGameOver(mControlledBall.getmBallPos(), mControlledBall.getmBallRadius(), mGameBall.getBallPos(), mGameBall.getBallRadius());
                 // The handler will tell the background thread to redraw the view.
                 mHandler.post(new Runnable() {
                     @Override
@@ -128,8 +148,15 @@ public class GameActivity extends Activity {
                         mGameView.invalidate();
                     }
                 });
+
+
             }
         };
+
+        if(isGameOver){
+            Toast toast = Toast.makeText(context, "Game Over", Toast.LENGTH_LONG);
+        }
+
 
         // Assign the task to the timer.
         mTimer.schedule(mTimerTask,
@@ -146,4 +173,33 @@ public class GameActivity extends Activity {
         Log.d(TAG, "onPause() called");
         mSensorManager.unregisterListener(sensorEventListener);
     }
+
+    public void checkGameOver(PointF controlled, int controlledRadius, PointF user, int userRadius){
+        double distance = Math.sqrt(Math.pow((controlled.x-user.x), 2.0)+Math.pow((controlled.y-user.y),2));
+        double radius = controlledRadius + userRadius;
+        //check if center of balls distance is greater than the balls combined radius if so end game
+        if(distance >= radius){
+            mControlledBall.setmBallAccel(new PointF(0, 0));
+            mControlledBall.setmBallVel(new PointF(0, 0));
+            mGameBall.setBallAccel(new PointF(0, 0));
+            mGameBall.setBallVel(new PointF(0, 0));
+            mGameBall.setDeviceAccel(new PointF(0, 0));
+            isGameOver = true;
+
+//            DialogFragment game_over = new GameOverDialog();
+//            game_over.show(getFragmentManager(), "gameOver");
+            //Toast over = Toast.makeText(context, "Game Over", Toast.LENGTH_LONG);
+            //over.show();
+        }
+        else{
+            //adjusts scoring;
+            game_score = current_time-game_score;
+            current_time = System.currentTimeMillis();
+            String score = Long.toString(game_score);
+            //Toast toast = Toast.makeText(context, score, Toast.LENGTH_SHORT);
+            //toast.show();
+        }
+    }
+
+
 }
