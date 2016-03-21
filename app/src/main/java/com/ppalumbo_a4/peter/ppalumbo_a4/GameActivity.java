@@ -21,7 +21,7 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class GameActivity extends Activity {
+public class GameActivity extends Activity{
     private static final String TAG = "GameActivity";
     //The Game View
     GameView mGameView;
@@ -60,10 +60,13 @@ public class GameActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         FrameLayout mainview = (FrameLayout)findViewById(R.id.main_game_view);
-        isGameOver = false;
+
         mGameView = new GameView(this);
         mainview.addView(mGameView);
 
+        //set game over to false and game score to 0
+        isGameOver = false;
+        game_score =0;
         context = this;
 
         //initialize the current time after the game starts
@@ -96,14 +99,15 @@ public class GameActivity extends Activity {
         // Get sensor manager and register the listener to it.
         mSensorManager = ((SensorManager)getSystemService(Context.SENSOR_SERVICE));
         Sensor accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mSensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(accelEventListener, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
 //        Sensor gyroscope =mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 //        mSensorManager.registerListener(sensorEventListener, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-
+        Sensor pressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+        mSensorManager.registerListener(pressEventListener, pressure, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-    // Define the sensor event listener.
-    private SensorEventListener sensorEventListener = new SensorEventListener() {
+    // Define the acclerometer listener to tell where bal to move
+    private SensorEventListener accelEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
             PointF accel = new PointF(event.values[0], event.values[1]);
@@ -117,6 +121,20 @@ public class GameActivity extends Activity {
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
             // ignore
+        }
+    };
+
+    //Define the pressure event listener to tell if user has pressed on the screen
+    private SensorEventListener pressEventListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            PointF press = new PointF(0,0);
+            mGameBall.setDeviceAccel(press);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
         }
     };
 
@@ -171,7 +189,7 @@ public class GameActivity extends Activity {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause() called");
-        mSensorManager.unregisterListener(sensorEventListener);
+        mSensorManager.unregisterListener(accelEventListener);
     }
 
     public void checkGameOver(PointF controlled, int controlledRadius, PointF user, int userRadius){
